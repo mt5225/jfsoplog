@@ -98,21 +98,85 @@ The analyzer provides comprehensive reports including:
 
 ## Example Output
 
+Here's an example analysis of a JuiceFS log showing high-throughput sequential reads:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            LOG ANALYSIS SUMMARY                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ Total Operations        │                                          9718 │
-│ Time Span Start        │                    2025.08.01 04:55:01.417050 │
-│ Time Span End          │                    2025.08.01 04:56:01.353778 │
-│ Total Time Span        │                                      59.94s │
-│ Operations per Second  │                                      162.1 │
-│ Access Pattern         │                                         MIXED │
-│ Sequential Access      │                                       36.7% │
-│ Random Access          │                                       63.3% │
-│ Total Data Read        │                                       248.0MB │
+│ Total Operations        │                                         10000 │
+│ Unique Inodes          │                                            44 │
+│ Time Span Start        │                    2025.08.01 09:37:51.270074 │
+│ Time Span End          │                    2025.08.01 09:38:01.443013 │
+│ Total Time Span        │                                      10.17s │
+│ Operations per Second  │                                      983.0 │
+│ Access Pattern         │                                    SEQUENTIAL │
+│ Sequential Access      │                                       89.6% │
+│ Random Access          │                                       10.4% │
+│ Total Data Read        │                                       223.3MB │
+│ Total Data Transfer    │                                       223.3MB │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                           OPERATION BREAKDOWN                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Flush              │     2396 ( 24.0%) │               ███████████ │
+│ Getattr            │      811 (  8.1%) │                      ████ │
+│ Lookup             │       98 (  1.0%) │                           │
+│ Open               │     2397 ( 24.0%) │               ███████████ │
+│ Read               │     1902 ( 19.0%) │                 █████████ │
+│ Release            │     2396 ( 24.0%) │               ███████████ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                              I/O STATISTICS                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Total Reads            │                                          1902 │
+│ Min Read Size          │                                         4.0KB │
+│ Max Read Size          │                                       128.0KB │
+│ Avg Read Size          │                                       120.2KB │
+│ Median Read Size       │                                       128.0KB │
+│ Read/Write Ratio       │                                   100.0% / 0.0% │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                           PERFORMANCE METRICS                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Min Duration           │                                   0.000000s │
+│ Max Duration           │                                   0.135695s │
+│ Avg Duration           │                                   0.002311s │
+│ Median Duration        │                                   0.000003s │
+│ Total Duration         │                                     23.110s │
+│ Avg Throughput         │                                      9.7MB/s │
+│ Read Throughput        │                                      9.7MB/s │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                              I/O BEHAVIOR                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Total Transitions      │                                          1874 │
+│ Backward Seeks         │                                           116 │
+│ Forward Seeks          │                                            79 │
+│ Avg Seek Distance      │                                        74.9GB │
+│ Max Seek Distance      │                                        34.3TB │
+│ Unique File Handles    │                                          2412 │
+│ Avg Ops per Handle     │                                        1.8 │
+│ Files with >100 Ops    │                                            11 │
+│ Max Time Gap           │                                      0.377s │
+│ Avg Time Gap           │                                   0.001022s │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           I/O SIZE DISTRIBUTION                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                               READ SIZES                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ≤4KB               │       19 (  1.0%) │                           │
+│ ≤8KB               │        2 (  0.1%) │                           │
+│ ≤32KB              │       42 (  2.2%) │                         █ │
+│ ≤64KB              │       30 (  1.6%) │                           │
+│ ≤128KB             │     1809 ( 95.1%) │ ███████████████████████████████████████████████ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+This example shows a **high-performance sequential workload** with:
+- **983 operations/second** over 10 seconds
+- **89.6% sequential access** pattern
+- **9.7MB/s throughput** with mostly 128KB reads
+- **2,412 file handles** with high concurrency
+- **Large file operations** across terabyte-scale offsets
 
 ## Use Cases
 
@@ -132,4 +196,14 @@ This tool is useful for:
 
 ## License
 
-[Add your license information here]
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
