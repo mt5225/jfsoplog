@@ -28,7 +28,7 @@ uv sync
 
 ```bash
 # Analyze a JuiceFS operation log file
-uv run oplog-analyze /path/to/logfile.log
+uv run oplog-analysis /path/to/logfile.log
 
 # Alternative: run directly with Python
 python -m src.oplog_analysis.log_analyzer /path/to/logfile.log

@@ -7,7 +7,7 @@ requires-python = ">=3.8"
 dependencies = []
 
 [project.scripts]
-oplog-analyze = "oplog_analysis.log_analyzer:main"
+oplog-analysis = "oplog_analysis.log_analyzer:main"
 
 [build-system]
 requires = ["hatchling"]
