@@ -1,13 +1,13 @@
 [project]
-name = "loganalysis"
+name = "oplog-analysis"
 version = "0.1.0"
-description = "JuiceFS log analyzer for I/O pattern analysis"
+description = "JuiceFS operation log analyzer for I/O pattern analysis"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = []
 
 [project.scripts]
-juicefs-analyze = "loganalysis.log_analyzer:main"
+oplog-analyze = "oplog_analysis.log_analyzer:main"
 
 [build-system]
 requires = ["hatchling"]

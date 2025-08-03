@@ -1,4 +1,4 @@
-# JuiceFS Log Analyzer
+# JuiceFS Operation Log Analyzer
 
 A Python tool for analyzing JuiceFS filesystem operation logs to understand I/O patterns, performance characteristics, and access behaviors.
 
@@ -16,7 +16,7 @@ A Python tool for analyzing JuiceFS filesystem operation logs to understand I/O 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd loganalysis
+cd oplog-analysis
 
 # Install with uv
 uv sync
@@ -27,11 +27,11 @@ uv sync
 ### Command Line Interface
 
 ```bash
-# Analyze a JuiceFS log file
-uv run juicefs-analyze /path/to/logfile.log
+# Analyze a JuiceFS operation log file
+uv run oplog-analyze /path/to/logfile.log
 
 # Alternative: run directly with Python
-python -m src.loganalysis.log_analyzer /path/to/logfile.log
+python -m src.oplog_analysis.log_analyzer /path/to/logfile.log
 ```
 
 ### Demo

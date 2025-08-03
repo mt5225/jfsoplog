@@ -460,7 +460,7 @@ def main():
     import sys
     
     if len(sys.argv) != 2:
-        print("Usage: juicefs-analyze <log_file_path>")
+        print("Usage: oplog-analyze <log_file_path>")
         sys.exit(1)
     
     log_file = sys.argv[1]

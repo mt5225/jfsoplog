@@ -1,6 +1,6 @@
 """Demo script showing how to use the log analyzer."""
 
-from src.loganalysis.log_analyzer import analyze_log
+from src.oplog_analysis.log_analyzer import analyze_log
 import os
 
 def main():
