@@ -8,6 +8,7 @@ A Python tool for analyzing JuiceFS filesystem operation logs to understand I/O 
 - **Performance Metrics**: Latency, throughput, and duration statistics  
 - **Operation Breakdown**: Detailed analysis of reads, writes, and metadata operations
 - **Size Distribution**: I/O request size patterns
+- **Continuous Operations Analysis**: Identifies inodes with continuous read/write patterns
 - **Temporal Analysis**: Time spans, operation rates, and gaps
 - **Concurrency Metrics**: File handle usage and concurrent access patterns
 
@@ -96,6 +97,12 @@ The analyzer provides comprehensive reports including:
 - Histogram of I/O request sizes by buckets
 - Separate analysis for reads and writes
 
+### Continuous Operations Analysis
+- Identifies inodes with continuous read or write operations (>50% sequential)
+- Shows operation counts, continuity percentages, and total bytes transferred
+- Displays top 3 most frequent operation sizes with occurrence counts
+- Separate sections for continuous reads and writes
+
 ## Example Output
 
 Here's an example analysis of a JuiceFS log showing high-throughput sequential reads:
@@ -169,6 +176,18 @@ Here's an example analysis of a JuiceFS log showing high-throughput sequential r
 │ ≤64KB              │       30 (  1.6%) │                           │
 │ ≤128KB             │     1809 ( 95.1%) │ ███████████████████████████████████████████████ │
 └─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        INODES WITH CONTINUOUS OPERATIONS                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                            CONTINUOUS READS                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Inode      │ Ops │ Cont% │ Total Bytes │ Top 3 Op Sizes               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 148199375  │  89 │  87% │      11.3MB │ 128.0KB(87),64.0KB(2)         │
+│ 38597810   │  45 │  82% │       5.6MB │ 128.0KB(43),32.0KB(2)         │
+│ 45758905   │  23 │  91% │       2.9MB │ 128.0KB(23)                   │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 This example shows a **high-performance sequential workload** with:
@@ -177,6 +196,7 @@ This example shows a **high-performance sequential workload** with:
 - **9.7MB/s throughput** with mostly 128KB reads
 - **2,412 file handles** with high concurrency
 - **Large file operations** across terabyte-scale offsets
+- **Continuous operations** on 3 inodes with 82-91% continuity, predominantly 128KB operations
 
 ## Use Cases
 

@@ -244,6 +244,79 @@ def analyze_access_pattern(operations: List[Dict]) -> Dict:
         'max_seek_distance': max(seek_distances) if seek_distances else 0
     }
 
+def analyze_continuous_operations(operations: List[Dict]) -> Dict:
+    """Analyze inodes with continuous read or write operations."""
+    # Group operations by inode
+    inode_ops = defaultdict(list)
+    for op in operations:
+        if op['operation'] in ['read', 'write'] and 'inode' in op and 'offset' in op:
+            inode_ops[op['inode']].append(op)
+    
+    continuous_inodes = {
+        'read': [],
+        'write': []
+    }
+    
+    for inode, ops in inode_ops.items():
+        if len(ops) < 3:  # Need at least 3 ops to determine continuity
+            continue
+            
+        # Separate reads and writes
+        reads = [op for op in ops if op['operation'] == 'read']
+        writes = [op for op in ops if op['operation'] == 'write']
+        
+        def check_continuity(op_list, op_type):
+            if len(op_list) < 3:
+                return
+                
+            # Sort by timestamp
+            op_list.sort(key=lambda x: x['timestamp'])
+            
+            continuous_count = 0
+            total_bytes = 0
+            
+            # Check for continuous operations (sequential offsets)
+            for i in range(1, len(op_list)):
+                prev_op = op_list[i-1]
+                curr_op = op_list[i]
+                
+                prev_end = prev_op['offset'] + prev_op['size']
+                curr_start = curr_op['offset']
+                
+                # Consider continuous if current starts within tolerance of previous end
+                if abs(curr_start - prev_end) <= prev_op['size']:
+                    continuous_count += 1
+                    total_bytes += curr_op['size']
+            
+            # If more than 50% of transitions are continuous, consider it continuous
+            if continuous_count > len(op_list) * 0.5:
+                avg_size = sum(op['size'] for op in op_list) / len(op_list)
+                sizes = [op['size'] for op in op_list]
+                
+                # Get top 3 operation sizes by frequency
+                from collections import Counter
+                size_counts = Counter(sizes)
+                top_3_sizes = size_counts.most_common(3)
+                
+                # Format top 3 sizes as "size1(count1),size2(count2),size3(count3)"
+                top_sizes_str = ",".join([f"{format_size(size)}({count})" for size, count in top_3_sizes])
+                
+                continuous_inodes[op_type].append({
+                    'inode': inode,
+                    'operations': len(op_list),
+                    'continuous_ops': continuous_count,
+                    'total_bytes': total_bytes,
+                    'avg_size': avg_size,
+                    'top_sizes': top_sizes_str,
+                    'op_type': op_type,
+                    'continuity_percentage': (continuous_count / (len(op_list) - 1)) * 100 if len(op_list) > 1 else 0
+                })
+        
+        check_continuity(reads, 'read')
+        check_continuity(writes, 'write')
+    
+    return continuous_inodes
+
 def format_size(size_bytes: int) -> str:
     """Format size in human readable format."""
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -297,6 +370,9 @@ def analyze_log(file_path: str):
     
     # Additional I/O behavior analysis
     io_analysis = analyze_io_behavior(operations)
+    
+    # Analyze continuous operations
+    continuous_analysis = analyze_continuous_operations(operations)
     
     # Print ASCII table
     print("┌─────────────────────────────────────────────────────────────────────────────┐")
@@ -452,6 +528,42 @@ def analyze_log(file_path: str):
             for bucket, count in sorted(write_size_buckets.items(), key=lambda x: ['≤4KB', '≤8KB', '≤32KB', '≤64KB', '≤128KB', '>128KB'].index(x[0])):
                 percentage = (count / len(write_sizes)) * 100
                 print(f"│ {bucket:<18} │ {count:>8} ({percentage:>5.1f}%) │ {'█' * int(percentage/2):>25} │")
+        
+        print("└─────────────────────────────────────────────────────────────────────────────┘")
+    
+    # Display continuous operations analysis
+    if continuous_analysis['read'] or continuous_analysis['write']:
+        print("\n┌─────────────────────────────────────────────────────────────────────────────┐")
+        print("│                        INODES WITH CONTINUOUS OPERATIONS                    │")
+        print("├─────────────────────────────────────────────────────────────────────────────┤")
+        
+        if continuous_analysis['read']:
+            print("│                            CONTINUOUS READS                                │")
+            print("├─────────────────────────────────────────────────────────────────────────────┤")
+            print("│ Inode      │ Ops │ Cont% │ Total Bytes │ Top 3 Op Sizes               │")
+            print("├─────────────────────────────────────────────────────────────────────────────┤")
+            
+            # Sort by continuity percentage descending
+            sorted_reads = sorted(continuous_analysis['read'], 
+                                key=lambda x: x['continuity_percentage'], reverse=True)
+            
+            for info in sorted_reads[:10]:  # Show top 10
+                print(f"│ {info['inode']:<10} │ {info['operations']:>3} │ {info['continuity_percentage']:>4.0f}% │ {format_size(info['total_bytes']):>11} │ {info['top_sizes']:<29} │")
+        
+        if continuous_analysis['write']:
+            if continuous_analysis['read']:
+                print("├─────────────────────────────────────────────────────────────────────────────┤")
+            print("│                           CONTINUOUS WRITES                                │")
+            print("├─────────────────────────────────────────────────────────────────────────────┤")
+            print("│ Inode      │ Ops │ Cont% │ Total Bytes │ Top 3 Op Sizes               │")
+            print("├─────────────────────────────────────────────────────────────────────────────┤")
+            
+            # Sort by continuity percentage descending
+            sorted_writes = sorted(continuous_analysis['write'], 
+                                 key=lambda x: x['continuity_percentage'], reverse=True)
+            
+            for info in sorted_writes[:10]:  # Show top 10
+                print(f"│ {info['inode']:<10} │ {info['operations']:>3} │ {info['continuity_percentage']:>4.0f}% │ {format_size(info['total_bytes']):>11} │ {info['top_sizes']:<29} │")
         
         print("└─────────────────────────────────────────────────────────────────────────────┘")
 

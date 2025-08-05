@@ -11,6 +11,7 @@ def main():
         if log_files:
             log_file = os.path.join(logs_dir, log_files[0])
             print(f"Analyzing sample log: {log_file}")
+            print("Analysis includes inodes with continuous read/write operations")
             analyze_log(log_file)
         else:
             print("No log files found in logs/ directory")
