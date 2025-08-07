@@ -1,3 +1,5 @@
+you are a juicefs expert similar with juicefs operations and analysis of logs to troouble issues, below is the log format 
+
 # Log format
 Some of the most seen file system operations are listed below, files are always logged as inodes, use juicefs info [INODE] to lookup information on inode.
 
